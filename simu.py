@@ -21,28 +21,51 @@ plt.axis([0, 1, 0, 1])
 red_patch = mpatches.Patch(color='red', label='enfermo')
 blue_patch = mpatches.Patch(color='blue', label='Infectado')
 
-for j in range(100):
-    velocidades = [[rd.random(), rd.random(), 0] for j in range(num_personas)]
+
+#keepgoing = True
+#while keepgoing:
+t_lapse=[]
+tot_contagiados=[]
+for t in range(100):
+    velocidades = [[rd.random(), rd.random(), 0] for t in range(num_personas)]
     velocidades = pd.DataFrame(velocidades, columns=['x', 'y', 'enfermo'])
+
     velocidades.loc[:,['x','y']] = velocidades.loc[:,['x','y']] - 0.5
 
     personas = personas + step_vel*velocidades
 
     personas[["x", 'y']] = personas[["x", 'y']] % 1
+    
+    tot_contagiados.append((num_personas - personas['enfermo'].sum())/num_personas)
+    
+        
+    # --Check threshold distance between people.
+    contagiable_dist = euclidean_distances(personas[['x', 'y']]) - np.identity(num_personas)
+    contagiable_dist = (contagiable_dist < distancia_contagiable) & (contagiable_dist != -1)
 
-    contagiables_distancia = euclidean_distances(personas[['x', 'y']]) - np.identity(num_personas)
-    contagiables_distancia = (contagiables_distancia < distancia_contagiable) & (contagiables_distancia != -1)
-
-    a_contagiar = contagiables_distancia @ personas["enfermo"]
+    a_contagiar = contagiable_dist @ personas["enfermo"]
     a_contagiar = np.argwhere(a_contagiar > 0).flatten()
+
 
     personas.loc[a_contagiar,"enfermo"] = 1
 
+
+    plt.subplot(1,2,1)
     plt.axis([0, 1, 0, 1])
     plt.scatter(personas['x'], personas['y'], c=personas['enfermo'].apply(lambda x: 'red' if x==1 else 'blue'))
 
     plt.legend(handles=[red_patch, blue_patch], loc='upper left')
     plt.pause(0.2)
-    plt.cla()
+
 
     print(personas['enfermo'].sum())
+
+    t_lapse.append(t)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(t_lapse,tot_contagiados,'r+')
+    plt.ylabel(f'frecuencia contagiados')
+    plt.xlabel(f'tiempo [pasos MC]')
+    plt.pause(0.2)
+
+
