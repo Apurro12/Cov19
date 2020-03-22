@@ -35,7 +35,7 @@ def main(argv):
     distancia_contagiable = float(args.R_Spread)
     step_vel = 0.02
 
-    ppl = [pd.random(size=3) for j in range(num_ppl)]
+    ppl = [rd.random(size=3) for j in range(num_ppl)]
     ppl = pd.DataFrame(ppl,columns = ['x','y','enfermo'])
     ppl.loc[:,'enfermo'] = ppl.loc[:,'enfermo'].apply(lambda x:1 if x > 0.995  else 0 )
 
@@ -50,7 +50,7 @@ def main(argv):
     #while keepgoing:
     t_lapse=[]
     tot_contagiados=[]
-    for t in range(10):
+    for t in range(100):
         velocidades = [[rd.random(), rd.random(), 0] for t in range(num_ppl)]
         velocidades = pd.DataFrame(velocidades, columns=['x', 'y', 'enfermo'])
         velocidades.loc[:,['x','y']] = velocidades.loc[:,['x','y']] - 0.5
@@ -72,7 +72,7 @@ def main(argv):
         #posibilidad_contagio = np.tensordot(ppl["sano"], ppl["sano"], axes=0)
         #posibilidad_contagio = posibilidad_contagio == 0
 
-        a_contagiar = contagiable_dist @ personas["enfermo"]
+        a_contagiar = contagiable_dist @ ppl["enfermo"]
         a_contagiar = np.argwhere(a_contagiar > 0).flatten()
 
 
@@ -90,9 +90,13 @@ def main(argv):
         plt.subplot(1,2,1)
         plt.tight_layout()
         plt.axis([0, 1, 0, 1])
-        plt.scatter(personas['x'], personas['y'], c=personas['enfermo'].apply(lambda x: 'red' if x==1 else 'blue'))
+        plt.scatter(
+                ppl['x'],
+                ppl['y'],
+                c=ppl['enfermo'].apply(lambda x: 'red' if x==1 else 'blue'))
 
         plt.legend(handles=[red_patch, blue_patch], loc='upper left')
+        plt.cla()
 
         plt.subplot(1, 2, 2)
         plt.tight_layout()
@@ -100,6 +104,7 @@ def main(argv):
         plt.ylabel(f'frecuencia contagiados')
         plt.xlabel(f'tiempo [pasos MC]')
         plt.pause(0.2)
+        plt.cla()
 
     
     return
