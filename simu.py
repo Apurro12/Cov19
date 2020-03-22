@@ -50,19 +50,18 @@ for t in range(100):
 
     personas.loc[a_contagiar, 'sano'] = 0
 
-    plt.figure(1)
+    plt.subplot(1,2,1)
     plt.axis([0, 1, 0, 1])
     plt.scatter(personas['x'], personas['y'], c=personas['sano'])
 
     plt.legend(handles=[red_patch, blue_patch], loc='upper left')
     plt.pause(0.2)
-    plt.cla()
 
     t_lapse.append(t)
-    
-    plt.figure(2)
+
+    plt.subplot(1, 2, 2)
     plt.plot(t_lapse,tot_contagiados,'r+')
     plt.ylabel(f'frecuencia contagiados')
     plt.xlabel(f'tiempo [pasos MC]')
     plt.pause(0.2)
-    plt.cla()
+    #plt.cla()
