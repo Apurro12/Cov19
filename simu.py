@@ -36,7 +36,7 @@ for t in range(100):
 
     personas[["x", 'y']] = personas[["x", 'y']] % 1
     
-    tot_contagiados.append((num_personas - personas['enfermo'].sum())/num_personas)
+    tot_contagiados.append(personas['enfermo'].sum()/num_personas)
     
         
     # --Check threshold distance between people.
@@ -48,24 +48,26 @@ for t in range(100):
 
 
     personas.loc[a_contagiar,"enfermo"] = 1
+    print(personas['enfermo'].sum())
+    t_lapse.append(t)
 
 
+    """"""""""""""""""""""""""""""""""""""""""""""""
+    """""""""""""Aca empiezan los plots """""""""""""
+    """""""""""""No actualizar variables"""""""""""""
+    """""""""""""De aca en adelante solo plotear  """
+    """"""""""""""""""""""""""""""""""""""""""""""""
     plt.subplot(1,2,1)
+    plt.tight_layout()
     plt.axis([0, 1, 0, 1])
     plt.scatter(personas['x'], personas['y'], c=personas['enfermo'].apply(lambda x: 'red' if x==1 else 'blue'))
 
     plt.legend(handles=[red_patch, blue_patch], loc='upper left')
-    plt.pause(0.2)
-
-
-    print(personas['enfermo'].sum())
-
-    t_lapse.append(t)
 
     plt.subplot(1, 2, 2)
+    plt.tight_layout()
     plt.plot(t_lapse,tot_contagiados,'r+')
     plt.ylabel(f'frecuencia contagiados')
     plt.xlabel(f'tiempo [pasos MC]')
     plt.pause(0.2)
-
 
