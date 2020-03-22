@@ -6,6 +6,9 @@ by Camilo Amadio & Santiago Noacco
 
 
 ## How to run
+$ python3 simu.py -nP 60 -rS 0.1
+-nP:: number of people
+-rS:: radius of spread
 
 
 
