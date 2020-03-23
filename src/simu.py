@@ -36,11 +36,11 @@ def main(argv):
     distancia_contagiable = float(args.R_Spread)
     step_vel = 0.02
     lastTime= int(args.LastTime)
-
+    cov19_rate_contagio = 0.3
+    rate_contagio = 1 - cov19_rate_contagio
 
     # --Init people in simulation
     ppl = CovMod.init_ppl(num_ppl)
-
     # --Init animation for plotting
     plt.ion()
     plt.axis([0, 1, 0, 1])
@@ -62,24 +62,22 @@ def main(argv):
         contagiable_dist = euclidean_distances(ppl[['x', 'y']]) - np.identity(num_ppl)
         contagiable_dist = (contagiable_dist < distancia_contagiable) & (contagiable_dist != -1)
 
-        #posibilidad_contagio = np.tensordot(ppl["sano"], ppl["sano"], axes=0)
-        #posibilidad_contagio = posibilidad_contagio == 0
-
         a_contagiar = contagiable_dist @ ppl["enfermo"]
-        a_contagiar = np.argwhere(a_contagiar > 0).flatten()
+        cond_contagio = a_contagiar > 0
+        a_contagiar = np.argwhere(cond_contagio).flatten()
 
 
         ppl.loc[a_contagiar,"enfermo"] = 1
-        print(ppl['enfermo'].sum())
+        #print(ppl['enfermo'].sum())
         t_lapse.append(t)
-    
+
+        # --If everyone is sick stop the simulation
         if ppl['enfermo'].sum()==ppl.shape[0]: break
 
         """
-                     Aca empiezan los plots              
-                     No actualizar variables             
-                     De aca en adelante solo
-                     plotear
+            Aca empiezan los plots.            
+            No actualizar variables.            
+            De aca en adelante solo plotear
         """
         
         plt.subplot(1,2,1)
