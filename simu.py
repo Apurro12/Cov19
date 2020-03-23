@@ -18,6 +18,7 @@ def Config_Parse():
     parser = argparse.ArgumentParser('Covid19')
     parser.add_argument('-nP', '--NbrPpl', required=True, help='Number of people in simulation' )
     parser.add_argument('-rS', '--R_Spread', required=True, help='Radious of spread' )
+    parser.add_argument('-lT', '--LastTime', required=True, help='Total lenght of simulation' )
     parser.add_argument('-I', '--Input', required=False, help='<Input folder or file/s>' )
     parser.add_argument('-O', '--Output', required=False, help='<Output folder or files/s>')
     parser.add_argument('-D','--Debug', required=False, help='Debug flag', action='store_true')
@@ -34,6 +35,7 @@ def main(argv):
     num_ppl = int(args.NbrPpl)
     distancia_contagiable = float(args.R_Spread)
     step_vel = 0.02
+    lastTime= int(args.LastTime)
 
     ppl = [rd.random(size=3) for j in range(num_ppl)]
     ppl = pd.DataFrame(ppl,columns = ['x','y','enfermo'])
@@ -50,7 +52,7 @@ def main(argv):
     #while keepgoing:
     t_lapse=[]
     tot_contagiados=[]
-    for t in range(100):
+    for t in range(lastTime):
         velocidades = [[rd.random(), rd.random(), 0] for t in range(num_ppl)]
         velocidades = pd.DataFrame(velocidades, columns=['x', 'y', 'enfermo'])
         velocidades.loc[:,['x','y']] = velocidades.loc[:,['x','y']] - 0.5
@@ -79,7 +81,8 @@ def main(argv):
         ppl.loc[a_contagiar,"enfermo"] = 1
         print(ppl['enfermo'].sum())
         t_lapse.append(t)
-
+    
+        if ppl['enfermo'].sum()==ppl.shape[0]: break
 
         """
                      Aca empiezan los plots              
@@ -87,26 +90,30 @@ def main(argv):
                      De aca en adelante solo
                      plotear
         """
+        
         plt.subplot(1,2,1)
         plt.tight_layout()
         plt.axis([0, 1, 0, 1])
         plt.scatter(
                 ppl['x'],
                 ppl['y'],
-                c=ppl['enfermo'].apply(lambda x: 'red' if x==1 else 'blue'))
+                c=ppl['enfermo'].apply(lambda x: 'red' if x==1 else 'blue')
+                )
 
         plt.legend(handles=[red_patch, blue_patch], loc='upper left')
-        plt.cla()
 
-        plt.subplot(1, 2, 2)
+        plt.subplot(1,2,2)
         plt.tight_layout()
         plt.plot(t_lapse,tot_contagiados,'r+')
         plt.ylabel(f'frecuencia contagiados')
         plt.xlabel(f'tiempo [pasos MC]')
         plt.pause(0.2)
+
+        plt.subplot(1,2,1)
+        plt.cla()
+        plt.subplot(1,2,2)
         plt.cla()
 
-    
     return
 
 if __name__ == '__main__':
