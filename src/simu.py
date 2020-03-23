@@ -5,7 +5,7 @@ from numpy import random as rd
 from matplotlib import pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.metrics.pairwise import euclidean_distances
-
+import cov19_sim_module as CovMod
 
 def Config_Parse():
     """
@@ -37,14 +37,13 @@ def main(argv):
     step_vel = 0.02
     lastTime= int(args.LastTime)
 
-    ppl = [rd.random(size=3) for j in range(num_ppl)]
-    ppl = pd.DataFrame(ppl,columns = ['x','y','enfermo'])
-    ppl.loc[:,'enfermo'] = ppl.loc[:,'enfermo'].apply(lambda x:1 if x > 0.995  else 0 )
 
+    # --Init people in simulation
+    ppl = CovMod.init_ppl(num_ppl)
 
+    # --Init animation for plotting
     plt.ion()
     plt.axis([0, 1, 0, 1])
-
     red_patch = mpatches.Patch(color='red', label='enfermo')
     blue_patch = mpatches.Patch(color='blue', label='Infectado')
 
@@ -53,19 +52,11 @@ def main(argv):
     t_lapse=[]
     tot_contagiados=[]
     for t in range(lastTime):
-        velocidades = [[rd.random(), rd.random(), 0] for t in range(num_ppl)]
-        velocidades = pd.DataFrame(velocidades, columns=['x', 'y', 'enfermo'])
-        velocidades.loc[:,['x','y']] = velocidades.loc[:,['x','y']] - 0.5
 
-        ## -- THIS 2 COULD BE A "WALK" FUNCTION
-        # --Update people position
-        ppl = ppl + step_vel*velocidades
-        
-        # --Set periodic boundary conditions
-        ppl[["x", 'y']] = ppl[["x", 'y']] % 1
+        # --Update position of people
+        ppl = next(CovMod.walk(ppl,num_ppl,step_vel))
         
         tot_contagiados.append(ppl['enfermo'].sum()/num_ppl)
-        
             
         # --Check threshold distance between people.
         contagiable_dist = euclidean_distances(ppl[['x', 'y']]) - np.identity(num_ppl)
