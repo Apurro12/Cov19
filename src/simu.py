@@ -4,7 +4,7 @@ import pandas as pd
 from numpy import random as rd
 from matplotlib import pyplot as plt
 import matplotlib.patches as mpatches
-from sklearn.metrics.pairwise import euclidean_distances
+#from sklearn.metrics.pairwise import euclidean_distances
 import cov19_sim_module as CovMod
 
 def Config_Parse():
@@ -33,10 +33,10 @@ def main(argv):
     
     #Preparo la simulacion
     num_ppl = int(args.NbrPpl)
-    distancia_contagiable = float(args.R_Spread)
+    r_spread = float(args.R_Spread)
     step_vel = 0.02
     lastTime= int(args.LastTime)
-    cov19_rate_contagio = 0.3
+    cov19_rate_contagio = 0.03
     rate_contagio = 1 - cov19_rate_contagio
 
     # --Init people in simulation
@@ -44,30 +44,23 @@ def main(argv):
     # --Init animation for plotting
     plt.ion()
     plt.axis([0, 1, 0, 1])
-    red_patch = mpatches.Patch(color='red', label='enfermo')
-    blue_patch = mpatches.Patch(color='blue', label='Infectado')
+    red_patch = mpatches.Patch(color='red', label='Enfermo')
+    blue_patch = mpatches.Patch(color='blue', label='Sano')
 
     #keepgoing = True
     #while keepgoing:
     t_lapse=[]
-    tot_contagiados=[]
+    tot_sick=[]
     for t in range(lastTime):
 
         # --Update position of people
         ppl = next(CovMod.walk(ppl,num_ppl,step_vel))
         
-        tot_contagiados.append(ppl['enfermo'].sum()/num_ppl)
-            
-        # --Check threshold distance between people.
-        contagiable_dist = euclidean_distances(ppl[['x', 'y']]) - np.identity(num_ppl)
-        contagiable_dist = (contagiable_dist < distancia_contagiable) & (contagiable_dist != -1)
+        tot_sick.append(ppl['enfermo'].sum()/num_ppl)
 
-        a_contagiar = contagiable_dist @ ppl["enfermo"]
-        cond_contagio = a_contagiar > 0
-        a_contagiar = np.argwhere(cond_contagio).flatten()
+        # --Update the people sick
+        ppl = next(CovMod.spread_sickness(ppl, num_ppl, r_spread, rate_contagio)) 
 
-
-        ppl.loc[a_contagiar,"enfermo"] = 1
         #print(ppl['enfermo'].sum())
         t_lapse.append(t)
 
@@ -93,7 +86,7 @@ def main(argv):
 
         plt.subplot(1,2,2)
         plt.tight_layout()
-        plt.plot(t_lapse,tot_contagiados,'r+')
+        plt.plot(t_lapse,tot_sick,'r+')
         plt.ylabel(f'frecuencia contagiados')
         plt.xlabel(f'tiempo [pasos MC]')
         plt.pause(0.2)
