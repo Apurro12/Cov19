@@ -23,6 +23,7 @@ def Config_Parse():
     parser.add_argument('-O', '--Output', required=False, help='<Output folder or files/s>')
     parser.add_argument('-D','--Debug', required=False, help='Debug flag', action='store_true')
     parser.add_argument('-M','--MaxEvents', required=False, help='Set maximum of events. Default -1 == all', type=int, default=-1)
+    parser.add_argument('-pH', '--P_Healing', required=True, help='healing probability of the ill')
     return parser
 
 
@@ -34,14 +35,14 @@ def main(argv):
     #Preparo la simulacion
     num_ppl = int(args.NbrPpl)
     distancia_contagiable = float(args.R_Spread)
-    step_vel = 0.02
+    step_vel = 0.0
     lastTime= int(args.LastTime)
     cov19_rate_contagio = 0.3
     prob_healing = float(args.P_Healing)
     rate_contagio = 1 - cov19_rate_contagio
 
     # --Init people in simulation
-    ppl = CovMod.init_ppl(num_ppl)
+    ppl = CovMod.init_ppl(num_ppl,Init_prob_healthy = 0.1)
     # --Init animation for plotting
     plt.ion()
     plt.axis([0, 1, 0, 1])
@@ -53,7 +54,7 @@ def main(argv):
     t_lapse=[]
     tot_contagiados=[]
     for t in range(lastTime):
-
+        CovMod.heal(ppl, num_ppl, prob_healing)
         # --Update position of people
         ppl = next(CovMod.walk(ppl,num_ppl,step_vel))
         
