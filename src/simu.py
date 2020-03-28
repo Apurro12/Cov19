@@ -40,11 +40,11 @@ def main(argv):
     rate_contagio = 1 - cov19_rate_contagio
 
     # --Init people in simulation
-    ppl = CovMod.init_ppl(num_ppl)
+    ppl = CovMod.init_ppl(num_ppl,0)
     # --Init animation for plotting
     plt.ion()
     plt.axis([0, 1, 0, 1])
-    red_patch = mpatches.Patch(color='red', label='enfermo')
+    red_patch  = mpatches.Patch(color='red' , label='enfermo')
     blue_patch = mpatches.Patch(color='blue', label='Infectado')
 
     #keepgoing = True
@@ -53,6 +53,7 @@ def main(argv):
     tot_contagiados=[]
     for t in range(lastTime):
 
+        CovMod.heal(ppl, num_ppl, 0.01)
         # --Update position of people
         ppl = next(CovMod.walk(ppl,num_ppl,step_vel))
         

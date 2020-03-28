@@ -4,19 +4,19 @@ import numpy as np
 from numpy import random as rd
 import pandas as pd
 
-def init_ppl(Tot_nbr_ppl,Init_prob_sick=0.995):
+def init_ppl(Tot_nbr_ppl,Init_prob_healthy=0.995):
     """
     Initializes the df of ppl in the simulation.
     if 'enfermo' == 1 -> means true -> it's a sick person
 
-    #Args:: Tot_nbr_ppl, Init_prob_sick (default = 0.995 == 99,5% not sick)
+    #Args:: Tot_nbr_ppl, Init_prob_healthy (default = 0.995 == 99,5% not sick)
 
     #Returns:: DataFrame of people
     """
     ppl = [rd.random(size=4) for j in range(Tot_nbr_ppl)]
     ppl = pd.DataFrame(ppl,columns = ['x','y','enfermo','prob_contagio'])
     ppl.loc[:,'enfermo'] = ppl.loc[:,'enfermo'].apply(
-            lambda x:1 if x > Init_prob_sick  else 0
+            lambda x:1 if x > Init_prob_healthy  else 0
             )
      
     return ppl
@@ -54,3 +54,14 @@ def walk(Ppl,Tot_nbr_ppl,Step_vel):
     Ppl[["x", 'y']] = Ppl[["x", 'y']] % 1
 
     yield Ppl
+
+def heal(ppl,Tot_nbr_ppl,prob_heal):
+    """
+    :param ppl:
+    :param prob_heal:
+    :return:
+    """
+    ppl_to_heal = np.random.random(Tot_nbr_ppl) < prob_heal
+    ppl_to_heal = ppl_to_heal & (ppl['enfermo'] == 1)
+    ppl.loc[ppl_to_heal,'enfermo'] = 0
+
