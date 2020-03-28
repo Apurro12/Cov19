@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy import random as rd
 import pandas as pd
+from sklearn.metrics.pairwise import euclidean_distances
 
 def init_ppl(Tot_nbr_ppl,Init_prob_healthy=0.995):
     """
@@ -52,6 +53,25 @@ def walk(Ppl,Tot_nbr_ppl,Step_vel):
     Ppl = Ppl + Step_vel*Vel
     # --Set periodic boundary conditions
     Ppl[["x", 'y']] = Ppl[["x", 'y']] % 1
+
+    # --Update people chance to get sick
+    Ppl.loc[:,'prob_contagio']=[rd.random() for x in range(Tot_nbr_ppl)]
+
+
+    yield Ppl
+    
+def spread_sickness(Ppl,Tot_nbr_ppl,R_spread,Rate_spread):
+    # --Check threshold distance between people.
+    dist_to_sick = euclidean_distances(Ppl[['x', 'y']]) - np.identity(Tot_nbr_ppl)
+    dist_to_sick = (dist_to_sick < R_spread) & (dist_to_sick != -1)
+    # --People in the range of sick people will have a 1.0 for close_to_sick
+    close_to_sick = dist_to_sick @ Ppl["enfermo"]
+    # --Get all indexes where people can get sick
+    close_to_sick = np.argwhere(close_to_sick > 0).flatten()
+    candid_sick = Ppl.loc[close_to_sick] 
+    # --Change the status of those close to sick people that fullfill the chance to get sick
+    new_sick = candid_sick[(candid_sick['prob_contagio'] >= Rate_spread) == True]
+    Ppl.loc[new_sick.index,"enfermo"] = 1
 
     yield Ppl
 
