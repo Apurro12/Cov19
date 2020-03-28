@@ -55,13 +55,18 @@ def walk(Ppl,Tot_nbr_ppl,Step_vel):
 
     yield Ppl
 
-def heal(ppl,Tot_nbr_ppl,prob_heal):
+def heal(ppl,Tot_nbr_ppl,prob_healing):
     """
-    :param ppl:
-    :param prob_heal:
-    :return:
+    Function to heal a infected person
+
+    #Args::
+        Ppl: the DataFrame that holds positions
+        Tot_nbr_ppl: total amount of people in simulation
+        P_Healing: probability of heal of each person (varies timestep to timestep)
+
+    #Returns:: None the update is inplace
     """
-    ppl_to_heal = np.random.random(Tot_nbr_ppl) < prob_heal
+    ppl_to_heal = np.random.random(Tot_nbr_ppl) < prob_healing
     ppl_to_heal = ppl_to_heal & (ppl['enfermo'] == 1)
     ppl.loc[ppl_to_heal,'enfermo'] = 0
 
